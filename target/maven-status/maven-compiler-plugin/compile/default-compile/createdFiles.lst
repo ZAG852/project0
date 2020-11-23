@@ -1,0 +1,10 @@
+com\revature\threads\PracticeThread.class
+com\revature\applet\App.class
+com\revature\databaseManagement\DatabaseManager.class
+com\revature\users\Admin.class
+com\revature\users\User.class
+com\revature\users\People.class
+com\revature\gear\Equipment.class
+com\revature\web\HelloWorld.class
+com\revature\gear\Food.class
+com\revature\JsonCreator.class
