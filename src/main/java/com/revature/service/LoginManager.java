@@ -1,5 +1,7 @@
 package com.revature.service;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
@@ -47,8 +49,8 @@ public class LoginManager {
 			}
 			byte[] pass = hashPass(user.getPassword(), salt);
 			stmt.setString(1, user.getUsername());
-			stmt.setString(2,salt.toString());
-			stmt.setString(3, pass.toString());
+			stmt.setBytes(2,salt);
+			stmt.setBytes(3, pass);
 			stmt.setBoolean(4, false);
 			HashedPassword = pass.toString();
 			if (stmt.executeUpdate() != 1) {
@@ -63,7 +65,7 @@ public class LoginManager {
 			}
 			
 			d.commit();
-		} catch (SQLException e1) {
+		} catch (SQLException | NoSuchAlgorithmException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
@@ -94,26 +96,23 @@ public class LoginManager {
 				}
 				byte[] pass = hashPass(user.getPassword(), salt);
 				stmt.setString(1, user.getUsername());
-				stmt.setString(2,salt.toString());
-				stmt.setString(3, pass.toString());
+				stmt.setBytes(2,salt);
+				stmt.setBytes(3, pass);
 				stmt.setBoolean(4, false);
-				System.out.println(pass.toString());
 				HashedPassword = pass.toString();
 				if (stmt.executeUpdate() != 1) {
 					throw new SQLException("Inserting new user failed, no rows were affected");
 				}
 				autoId = 0;
 				ResultSet generatedKeys = stmt.getGeneratedKeys();
-				System.out.println("I got here");
 				if (generatedKeys.next()) {
-					System.out.println("I got further");
 					autoId = generatedKeys.getInt(1);
 				} else {
 					throw new SQLException("Creating user failed, no ID generated");
 				}
 				
 				d.commit();
-			} catch (SQLException e1) {
+			} catch (SQLException | NoSuchAlgorithmException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
@@ -123,15 +122,20 @@ public class LoginManager {
 		else
 			return null;
 	}
-	private byte[] hashPass(String password , byte[] salt) {
+	private byte[] hashPass(String password , byte[] salt) throws NoSuchAlgorithmException {
 		// TODO Auto-generated method stub
 		Hasher bcrypter = BCrypt.withDefaults();
 		byte[] generatedPw = bcrypter.hash(8, salt, password.getBytes());
 		return generatedPw;
+		// Option 1: Hash password using SHA + salt
+		//MessageDigest md = MessageDigest.getInstance("SHA-512");
+		//md.update(salt);
+		//byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
+		//return hashedPassword;
 	}
 
 	public boolean logUser(String username, String password) {
-		byte[] hashedPassword;
+		String hashedPassword;
 	    byte[] salt;
 	    String sql = "select salt, password from users where username = ?";
 	    
@@ -141,10 +145,13 @@ public class LoginManager {
 	        ResultSet resultSet = pstmt.executeQuery();
 
 	        resultSet.next();
-	        salt = resultSet.getString("salt").getBytes();
-	        hashedPassword = resultSet.getString("password").getBytes();
-
-	        if (hashedPassword.equals(hashPass(password, salt))) {
+	        salt = resultSet.getBytes("salt");
+	        System.out.println("Salt: " + new String(salt));
+	        hashedPassword = new String(resultSet.getBytes("password"));
+	        System.out.println("hash: " + hashedPassword);
+	        System.out.println("my hash: " + hashPass(password, salt));
+	        if (hashedPassword.equals(new String(hashPass(password, salt)))) {
+	        	
 	            return true;
 	        } else {
 	            return false;
