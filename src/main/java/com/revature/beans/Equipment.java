@@ -1,4 +1,4 @@
-package com.revature.beans.gear;
+package com.revature.beans;
 
 public class Equipment {
 	private float price = 0.0f;

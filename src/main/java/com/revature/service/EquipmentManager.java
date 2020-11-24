@@ -3,7 +3,7 @@ package com.revature.service;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import com.revature.beans.gear.Equipment;
+import com.revature.beans.Equipment;
 
 public class EquipmentManager {
 	ArrayList<Equipment> allEquipment;

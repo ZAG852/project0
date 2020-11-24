@@ -35,10 +35,10 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>CreateUserServlet</servlet-name>
-    <url-pattern>/createUser</url-pattern>
+    <url-pattern>/Login/CreateUser</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>CreateUserServlet</servlet-name>
-    <url-pattern>/createUser/*</url-pattern>
+    <url-pattern>/Login/CreateUser/*</url-pattern>
   </servlet-mapping>
 </web-app>

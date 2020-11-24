@@ -12,6 +12,9 @@ import java.sql.Statement;
 import org.javatuples.Pair;
 
 import at.favre.lib.crypto.bcrypt.BCrypt.Hasher;
+
+import com.revature.beans.People;
+import com.revature.beans.UserTemplate;
 import com.revature.doa.DatabaseManager;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
@@ -22,27 +25,56 @@ public class LoginManager {
 		this.db = new DatabaseManager();
 	}
 	
-	public boolean createUser(String username, String password) {
-		
-		try(Connection d =db.getLocalConnection("OutdoorApp", "postgres", "myLocal");) {
+	public People createUser(UserTemplate user) {
+		int autoId = -1;
+		String HashedPassword ="";
+		try(Connection d =db.getLocalConnection("OutdoorApp", "postgres", "myLocal")) {
 			d.setAutoCommit(false);
-			String sqlQuery = "Insert into username"
-					+ "(special)"
+			String sqlQuery = "Insert into users"
+					+ "(username,salt, password, special)"
 					+ "Values"
-					+"(?)"; 
+					+"(?, ?, ?, ?)"; 
 			PreparedStatement stmt = d.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-			stmt.setBoolean(1, false);
+			byte[] salt = new byte[16];
+			try {
+				salt = getSalt();
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchProviderException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			byte[] pass = hashPass(user.getPassword(), salt);
+			stmt.setString(1, user.getUsername());
+			stmt.setString(2,salt.toString());
+			stmt.setString(3, pass.toString());
+			stmt.setBoolean(4, false);
+			HashedPassword = pass.toString();
+			if (stmt.executeUpdate() != 1) {
+				throw new SQLException("Inserting new user failed, no rows were affected");
+			}
+			autoId = 0;
+			ResultSet generatedKeys = stmt.getGeneratedKeys();
+			if (generatedKeys.next()) {
+				autoId = generatedKeys.getInt(1);
+			} else {
+				throw new SQLException("Creating user failed, no ID generated");
+			}
+			
+			d.commit();
 		} catch (SQLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
-		
-		return false;
+		return new People(user.getUsername(), HashedPassword, autoId, false);
 	}
-	public boolean createUser(String username, String password, String adminKey) {
+	public People createUser(UserTemplate user, String adminKey) {
 		if(adminKey == this.adminKey)
 		{
+			int autoId = -1;
+			String HashedPassword ="";
 			try(Connection d =db.getLocalConnection("OutdoorApp", "postgres", "myLocal")) {
 				d.setAutoCommit(false);
 				String sqlQuery = "Insert into users"
@@ -60,20 +92,36 @@ public class LoginManager {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				byte[] pass = hashPass(password, salt);
-				stmt.setString(1, username);
-				stmt.setBytes(2,salt);
-				stmt.setBytes(3, pass);
+				byte[] pass = hashPass(user.getPassword(), salt);
+				stmt.setString(1, user.getUsername());
+				stmt.setString(2,salt.toString());
+				stmt.setString(3, pass.toString());
 				stmt.setBoolean(4, false);
+				System.out.println(pass.toString());
+				HashedPassword = pass.toString();
+				if (stmt.executeUpdate() != 1) {
+					throw new SQLException("Inserting new user failed, no rows were affected");
+				}
+				autoId = 0;
+				ResultSet generatedKeys = stmt.getGeneratedKeys();
+				System.out.println("I got here");
+				if (generatedKeys.next()) {
+					System.out.println("I got further");
+					autoId = generatedKeys.getInt(1);
+				} else {
+					throw new SQLException("Creating user failed, no ID generated");
+				}
+				
+				d.commit();
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
-			return true;
+			return new People(user.getUsername(), HashedPassword, autoId, false);
 		}
 		else
-			return false;
+			return null;
 	}
 	private byte[] hashPass(String password , byte[] salt) {
 		// TODO Auto-generated method stub
@@ -93,16 +141,18 @@ public class LoginManager {
 	        ResultSet resultSet = pstmt.executeQuery();
 
 	        resultSet.next();
-	        salt = resultSet.getBytes("salt");
-	        hashedPassword = resultSet.getBytes("password");
+	        salt = resultSet.getString("salt").getBytes();
+	        hashedPassword = resultSet.getString("password").getBytes();
 
 	        if (hashedPassword.equals(hashPass(password, salt))) {
 	            return true;
 	        } else {
 	            return false;
 	        }
-	    } catch(NoSuchAlgorithmException | SQLException | UnsupportedEncodingException ex) {
+	    } catch(SQLException ex) {
 	        return false;
+	    }catch(Exception e) {
+	    	return false;
 	    }
 	}
 	public byte[] getSalt() throws NoSuchAlgorithmException, NoSuchProviderException {

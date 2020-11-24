@@ -1,21 +1,21 @@
 Drop Table if Exists Equipment;
 create Table Equipment(--To include Clothing or to not
-    equipId Int GENERATED ALWAYS AS identity,
+    equipId SERIAL PRIMARY key, --Int GENERATED ALWAYS AS identity,
     equipName VarChar(255) not null,
     price float,
     isFood Boolean
 );
 Drop Table if Exists users;
 Create Table users(
+	userId SERIAL PRIMARY KEY ,
 	username varchar(255),
-	salt varbinary(512),
-	password varbinary(512),
-    special Boolean, --Whether or not user is admin
-    userId Int GENERATED ALWAYS AS IDENTITY
+	salt varchar(512),
+	password varchar (512),
+    special Boolean --Whether or not user is admin
 );
 Drop Table if Exists Trip;
 Create Table Trip(
-    tripId Int GENERATED ALWAYS AS IDENTITY, 
+    tripId Int SERIAL PRIMARY KEY, 
     userId Int not null, --Person Whom trip belongs to
     tripName VarChar(255) not null
 );
@@ -56,4 +56,4 @@ VALUES
 ('pot', 1.99, false),
 ('clothing', 3.99, false);
 
-select * from equipment e;
+select * from users;
