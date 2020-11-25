@@ -41,4 +41,20 @@
     <servlet-name>CreateUserServlet</servlet-name>
     <url-pattern>/Login/CreateUser/*</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>com.revature.servlet.LogoutServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LogoutServlet</servlet-name>
+    <url-pattern>/Logout</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>CreateTripServlet</servlet-name>
+    <servlet-class>com.revature.servlet.CreateTripServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CreateTripServlet</servlet-name>
+    <url-pattern>/Create/Trip/*</url-pattern>
+  </servlet-mapping>
 </web-app>

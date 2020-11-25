@@ -3,16 +3,23 @@ package com.revature.beans;
 public class Trip {
 	private int tripId;
 	private String tripName;
-	String getTripName() {
+	public Trip(int id, String name) {
+		this.tripId = id;
+		this.tripName = name;
+	}
+	public Trip(String name) {
+		this.tripName = name;
+	}
+	public String getTripName() {
 		return tripName;
 	}
-	void setTripName(String tripName) {
+	public void setTripName(String tripName) {
 		this.tripName = tripName;
 	}
-	int getTripId() {
+	public int getTripId() {
 		return tripId;
 	}
-	void setTripId(int tripId) {
+	public void setTripId(int tripId) {
 		this.tripId = tripId;
 	}
 }

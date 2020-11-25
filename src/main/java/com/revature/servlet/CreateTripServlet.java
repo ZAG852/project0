@@ -2,38 +2,29 @@ package com.revature.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.beans.People;
+import com.revature.beans.Trip;
+import com.revature.beans.TripTemplate;
 import com.revature.beans.UserTemplate;
-import com.revature.service.LoginManager;
+import com.revature.dao.TripDAO;
+import com.revature.service.TripManager;
 
-/**
- * Servlet implementation class Login
- */
-
-public class LoginServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private LoginManager log = new LoginManager();
+public class CreateTripServlet extends HttpServlet {
+	String message = "";
 	private ObjectMapper objectMapper = new ObjectMapper();
-	private String message;
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public LoginServlet() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
+	TripDAO tripdb = new TripDAO();
+	TripManager TM = new TripManager();
 	/**
 	 * @see Servlet#init(ServletConfig)
 	 */
@@ -46,14 +37,15 @@ public class LoginServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		BufferedReader reader = request.getReader();
-		HttpSession session = request.getSession(true);
+		HttpSession session = request.getSession();
+		if(session.isNew())
+		{
+			response.getWriter().append("Please login.");
+		}
+		else {
 		StringBuilder sb = new StringBuilder();
 		String line;
 		while ((line = reader.readLine()) != null) {
@@ -61,27 +53,26 @@ public class LoginServlet extends HttpServlet {
 		}
 		
 		String jsonString = sb.toString();
-		UserTemplate userData = objectMapper.readValue(jsonString, UserTemplate.class);
-		People p = log.logUser(userData.getUsername(), userData.getPassword());
-		if(p != null)
+		System.out.println(jsonString);
+		try {
+		TripTemplate tripData = objectMapper.readValue(jsonString, TripTemplate.class);
+		System.out.println("after tripData");
+		People p = (People)session.getAttribute("user");
+		Trip t = TM.createTrip(p.getId(), tripData.getName());
+		if(t != null)
 		{
-			if(session.isNew())
-			{
-				session.setAttribute("user", p);
-			}
-			String insertedUserJSON = objectMapper.writeValueAsString(p);
-			
-			response.getWriter().append(insertedUserJSON);
+			//session.setAttribute("trip", t);
+			response.getWriter().append(objectMapper.writeValueAsString(t));
 			response.setContentType("application/json");
-			response.setStatus(201);
+			response.setStatus(200);
+		}
+		}catch(JsonProcessingException e)
+		{
+			e.printStackTrace();
+		}
+		
+		
+		
 		}
 	}
-
-	/**
-	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
-	 */
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-	}
-
 }

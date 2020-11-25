@@ -5,34 +5,43 @@ public class Equipment {
 	private String name = "";
 	private int id = -1;
 	private Boolean isFood = false;
-	public Equipment(float price, String name, Boolean isFood)
+	private int quantity = 1;
+	public Equipment(float price, String name, Boolean isFood, int id, int quantity)
 	{
 		this.setPrice(price);
 		this.setName(name);
 		this.setIsFood(isFood);
+		this.id = id;
+		this.setQuantity(quantity);
 	}
-	float getPrice() {
+	public float getPrice() {
 		return price;
 	}
-	void setPrice(float price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
-	String getName() {
+	public String getName() {
 		return name;
 	}
-	void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
-	int getId() {
+	public int getId() {
 		return id;
 	}
-	void setId(int id) {
+	public void setId(int id) {
 		this.id = id;
 	}
-	Boolean getIsFood() {
+	public Boolean getIsFood() {
 		return isFood;
 	}
-	void setIsFood(Boolean isFood) {
+	public void setIsFood(Boolean isFood) {
 		this.isFood = isFood;
+	}
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 }

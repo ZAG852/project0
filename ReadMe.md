@@ -1,15 +1,10 @@
-# Heading
+# Travel Planner
 ## Subheading
 
 This is a practice paragraph
 
-![Sql Diagram](v1SqlDiagram.PNG)
+![Sql Diagram](sql_image.png)
 ### greater sub
-- bullet
-- jfjfj
-    - jfjfj
-    - 
 1. Numbers inconsequential
-1. 
-2. 
-1. 
+3. fffff
+4. fff

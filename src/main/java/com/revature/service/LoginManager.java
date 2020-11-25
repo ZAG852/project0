@@ -17,7 +17,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt.Hasher;
 
 import com.revature.beans.People;
 import com.revature.beans.UserTemplate;
-import com.revature.doa.DatabaseManager;
+import com.revature.dao.DatabaseManager;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 public class LoginManager {
@@ -134,10 +134,10 @@ public class LoginManager {
 		//return hashedPassword;
 	}
 
-	public boolean logUser(String username, String password) {
+	public People logUser(String username, String password) {
 		String hashedPassword;
 	    byte[] salt;
-	    String sql = "select salt, password from users where username = ?";
+	    String sql = "select special, userid, salt, password from users where username = ?";
 	    
 	    try(Connection d =db.getLocalConnection("OutdoorApp", "postgres", "myLocal")) {
 	    	PreparedStatement pstmt = d.prepareStatement(sql);
@@ -151,15 +151,17 @@ public class LoginManager {
 	        System.out.println("hash: " + hashedPassword);
 	        System.out.println("my hash: " + hashPass(password, salt));
 	        if (hashedPassword.equals(new String(hashPass(password, salt)))) {
-	        	
-	            return true;
+	        	System.out.println(true);
+	        	People p = new People(username, hashedPassword,resultSet.getInt("userid"), resultSet.getBoolean("special"));
+	        	System.out.println("inside loginmanager " +p);
+	            return p;
 	        } else {
-	            return false;
+	            return null;
 	        }
 	    } catch(SQLException ex) {
-	        return false;
+	        return null;
 	    }catch(Exception e) {
-	    	return false;
+	    	return null;
 	    }
 	}
 	public byte[] getSalt() throws NoSuchAlgorithmException, NoSuchProviderException {
