@@ -14,12 +14,11 @@ public class TripDAO {
 	
 	public ArrayList<Trip> getAllTrips(int userId){
 		ArrayList<Trip> trips = new ArrayList<Trip>();
-		String sqlQuery = "Select * from Trip"
-				+ "where userId = ?;";
+		String sqlQuery = "Select * from Trip where userId = ?;";
 		try (Connection connection = db.getLocalConnection("OutdoorApp", "postgres", "myLocal")) {
 			PreparedStatement stmt = connection.prepareStatement(sqlQuery);
 			stmt.setInt(1, userId);
-			ResultSet rs = stmt.executeQuery(sqlQuery);
+			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				int id = rs.getInt(1);
 				String name = rs.getString(2);
@@ -32,6 +31,73 @@ public class TripDAO {
 		}
 		
 		return trips;
+	}
+	public boolean AddItemToTrip(int tripId, int userId, int quantity, int equipId){
+		String sql = "Select quantity from equipmentTrip where userId = ? AND tripId = ?;";
+		try(Connection connection = db.getLocalConnection("OutdoorApp", "postgres", "myLocal"))
+		{
+			connection.setAutoCommit(false);
+			PreparedStatement pstmt = connection.prepareStatement(sql);
+			pstmt.setInt(1, userId);
+			pstmt.setInt(2, tripId);
+			ResultSet rs = pstmt.executeQuery();
+			rs.next();
+			int q = rs.getInt(1);
+			q += quantity;
+			pstmt.close();
+			String sqlQuery = "UPDATE equipmentTrip SET quantity = ? where tripId = ? and userId = ?";
+			pstmt = connection.prepareStatement(sqlQuery);
+			pstmt.setInt(1, q);
+			pstmt.setInt(2, tripId);
+			pstmt.setInt(3, userId);
+			if (pstmt.executeUpdate() != 1) {
+				throw new SQLException("Updating failed, no rows were affected");
+			}
+			connection.commit();
+			return true;
+		}catch(SQLException e) {
+			System.out.println("the initial query found nothing");
+			try(Connection connection = db.getLocalConnection("OutdoorApp", "postgres", "myLocal")){
+				connection.setAutoCommit(false);
+				String sqlQuery = "Insert into equipmentTrip"
+						+ " (equipId, tripId, quantity)"
+						+ " Values "
+						+ "(?,?,?);";
+				PreparedStatement pstmt = connection.prepareStatement(sqlQuery);
+				pstmt.setInt(1, userId);
+				pstmt.setInt(2, tripId);
+				pstmt.setInt(3, quantity);
+				if (pstmt.executeUpdate() != 1) {
+					throw new SQLException("Inserting new item failed, no rows were affected");
+				}
+				connection.commit();
+				return true;
+			}catch(SQLException e1)
+			{
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	public Trip updateTripName(int userId, int tripId, String newName)
+	{
+		String sql = "Update Trip SET tripName = ? where userId =? AND tripId = ?;";
+		try (Connection connection = db.getLocalConnection("OutdoorApp", "postgres", "myLocal")){
+			connection.setAutoCommit(false);
+			PreparedStatement pstmt = connection.prepareStatement(sql);
+			pstmt.setString(1, newName);
+			pstmt.setInt(2, userId);
+			pstmt.setInt(3, tripId);
+		if (pstmt.executeUpdate() != 1) {
+			throw new SQLException("Updating failed, no rows were affected");
+		}
+		connection.commit();
+		return new Trip(tripId, newName);
+		}catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+		return null;
 	}
 	public Trip createTrip(int userId, String name) {
 		int autoId =0;
@@ -137,17 +203,19 @@ public class TripDAO {
 	}
 	public boolean deleteItem(int tripId, int equipId) {
 		String sqlQuery = "Select et.quantity"
-				+ "from equipmentTrip et "
+				+ " from equipmentTrip et "
 				+ "where et.tripId = ? AND eq.equipId = ?;";
 		try(Connection connection = db.getLocalConnection("OutdoorApp", "postgres", "myLocal")){
 			PreparedStatement pstmt = connection.prepareStatement(sqlQuery);
 			pstmt.setInt(1,tripId);
 			pstmt.setInt(2, equipId);
 			ResultSet rs = pstmt.executeQuery(sqlQuery);
+			rs.next();
 			int quantity = rs.getInt(1);
 			if(quantity > 1)
 			{
 				quantity--;
+				
 				return true;
 			}else {
 				pstmt.close();
@@ -161,5 +229,27 @@ public class TripDAO {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	public Trip GetATrip(int tripId, int userId)
+	{
+		String sql = "Select * from trip where tripId = ?;";
+		try(Connection connection = db.getLocalConnection("OutdoorApp", "postgres", "myLocal")){
+			PreparedStatement pstmt = connection.prepareStatement(sql);
+			pstmt.setInt(1, tripId);
+			ResultSet rs = pstmt.executeQuery();
+			rs.next();
+			int id = rs.getInt(1);
+			int db_Id = rs.getInt(2);
+			String name = rs.getString(3);
+			if(userId != db_Id)
+			{
+				throw new SQLException("Does not belong to user or does not exist!");
+			}
+			System.out.println("Get A Trip!");
+			return new Trip(id, name);
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

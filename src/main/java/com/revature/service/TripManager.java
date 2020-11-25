@@ -16,11 +16,21 @@ public class TripManager {
 	{
 		return trip.deleteTrip(tripId);
 	}
-	ArrayList<Equipment> GetItemsTrip(int tripId){
+	public ArrayList<Equipment> GetItemsTrip(int tripId){
 		return trip.SelectEquipmentTrip(tripId);
 	}
-	ArrayList<Equipment> GetItemsFood(int tripId)
+	public ArrayList<Equipment> GetItemsFood(int tripId)
 	{
 		return trip.SelectFoodTrip(tripId);
+	}
+	public Trip getTrip(int tripId, int userId) {
+		return trip.GetATrip(tripId, userId);
+	}
+	public boolean addItemToTrip(int userId, int tripId, int equipId, int quantity)
+	{
+		return trip.AddItemToTrip(tripId, userId, quantity, equipId);
+	}
+	public Trip EditTripName(int userId, int tripId, String newName) {
+		return trip.updateTripName(userId, tripId, newName);
 	}
 }

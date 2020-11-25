@@ -57,4 +57,37 @@
     <servlet-name>CreateTripServlet</servlet-name>
     <url-pattern>/Create/Trip/*</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <servlet-name>GetTripServlet</servlet-name>
+    <servlet-class>com.revature.servlet.GetTripServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetTripServlet</servlet-name>
+    <url-pattern>/Trip/All</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetTripServlet</servlet-name>
+    <url-pattern>/Trip/Edit</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>GetTripServlet</servlet-name>
+    <url-pattern>/Trip/*</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>Get_ItemsServlet</servlet-name>
+    <servlet-class>com.revature.servlet.Get_ItemsServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Get_ItemsServlet</servlet-name>
+    <url-pattern>/Item/All</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>ItemToTrip</servlet-name>
+    <servlet-class>com.revature.servlet.ItemToTripServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ItemToTrip</servlet-name>
+    <url-pattern>/Trip/Item/Add</url-pattern>
+  </servlet-mapping>
+  
 </web-app>

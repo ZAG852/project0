@@ -2,9 +2,6 @@ package com.revature.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,45 +10,40 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.revature.beans.Equipment;
 import com.revature.beans.People;
-import com.revature.beans.UserTemplate;
-import com.revature.service.LoginManager;
+import com.revature.beans.Trip;
+import com.revature.beans.TripTemplate;
+import com.revature.dao.ItemTemplate;
+import com.revature.service.TripManager;
 
 /**
- * Servlet implementation class Login
+ * Servlet implementation class ItemToTripServlet
  */
-
-public class LoginServlet extends HttpServlet {
+public class ItemToTripServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private LoginManager log = new LoginManager();
+	TripManager TM = new TripManager();
 	private ObjectMapper objectMapper = new ObjectMapper();
-	private String message;
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public LoginServlet() {
+    public ItemToTripServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
 
 	/**
-	 * @see Servlet#init(ServletConfig)
-	 */
-	public void init(ServletConfig config) throws ServletException {
-		 message = "Please Login!";
-	}
-
-	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		BufferedReader reader = request.getReader();
 		HttpSession session = request.getSession(true);
 		StringBuilder sb = new StringBuilder();
@@ -61,24 +53,21 @@ public class LoginServlet extends HttpServlet {
 		}
 		
 		String jsonString = sb.toString();
-		UserTemplate userData = objectMapper.readValue(jsonString, UserTemplate.class);
-		People p = log.logUser(userData.getUsername(), userData.getPassword());
-		if(p != null)
+		if(session.getAttribute("user") != null)
 		{
-			session.setAttribute("user", p);
-			String insertedUserJSON = objectMapper.writeValueAsString(p);
-			
-			response.getWriter().append(insertedUserJSON);
-			response.setContentType("application/json");
-			response.setStatus(201);
+			if(session.getAttribute("trip") != null)
+			{
+				People person = (People)session.getAttribute("user");
+				Trip trip = (Trip)session.getAttribute("trip");
+				ItemTemplate itemData = objectMapper.readValue(jsonString, ItemTemplate.class);
+				boolean e = TM.addItemToTrip(person.getId(), trip.getTripId(), itemData.getId(), itemData.getQuantity());
+				response.getWriter().append("The out put is " + e);
+			}else {
+				response.getWriter().append("Select a trip to assign items to!");
+			}
+		}else {
+			response.getWriter().append("Login to use this feature!");
 		}
-	}
-
-	/**
-	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
-	 */
-	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 	}
 
 }
